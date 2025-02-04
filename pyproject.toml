@@ -1,0 +1,11 @@
+[project]
+name = "relatorio-anual-mb"
+version = "0.1.0"
+requires-python = ">=3.12"
+description = "Add your description here"
+readme = "README.md"
+dependencies = [
+    "openpyxl",
+    "python-docx",
+    "Pillow"
+]
