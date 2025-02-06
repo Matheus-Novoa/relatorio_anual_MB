@@ -13,7 +13,7 @@ df = pd.read_excel('Serviços maple bear zona norte.xls', sheet_name='Serviços'
 matriculas_df = pd.read_excel(
     'Matriculas.xlsx',
     sheet_name="Alunos Matriculados (Paulo)",
-    usecols=['Responsável Financeiro', 'CPF', 'Endereço', 'Bairro']
+    usecols=['Aluno', 'Responsável Financeiro', 'CPF', 'Endereço', 'Bairro']
 )
 
 # Rename columns
@@ -48,7 +48,7 @@ for client in unique_clients:
 
         dados_responsavel = matriculas_df[
             matriculas_df['Responsável Financeiro'].str.lower() == nome_correspondente
-        ][['Endereço', 'Bairro']].iloc[0:1]
+        ][['Aluno', 'Endereço', 'Bairro']].iloc[0:1]
         
         if not client_df.empty:
             # Create safe filename by removing invalid characters
