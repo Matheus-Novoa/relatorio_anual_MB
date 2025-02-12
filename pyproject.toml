@@ -11,4 +11,5 @@ dependencies = [
     "xlrd>=2.0.1",
     "pdf2image>=1.17.0",
     "pywin32>=308",
+    "dataframe-image>=0.2.7",
 ]

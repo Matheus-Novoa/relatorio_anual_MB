@@ -17,7 +17,7 @@ matriculas_df = pd.read_excel(
 )
 
 # Rename columns
-df.columns = ['Data', 'Nota', 'Cliente', 'Valor_Contabil'] if len(df.columns) >= 4 else df.columns
+df.columns = ['Data', 'Nota', 'Cliente', 'Valor Contábil'] if len(df.columns) >= 4 else df.columns
 
 # Remove rows with empty dates or where 'Data' is in the Date column
 df = df[df['Data'].notna()]
@@ -55,7 +55,7 @@ for client in unique_clients:
             safe_filename = "".join(x for x in str(client) if x.isalnum() or x in (' ', '-', '_'))
             
             # Reordenar as colunas antes de salvar
-            client_df = client_df[['Data', 'Nota', 'Cliente', 'CPF', 'Valor_Contabil']]
+            client_df = client_df[['Data', 'Nota', 'Cliente', 'CPF', 'Valor Contábil']]
             
             # Count occurrences of each date
             date_counts = client_df['Data'].value_counts()
@@ -90,68 +90,12 @@ for client in unique_clients:
             sheet = workbook['notas']
             
             client_df_from_excel = pd.read_excel(file, sheet_name='notas')
-            total = client_df_from_excel['Valor_Contabil'].sum()
-            
-            # Formatação contábil para a coluna Valor_Contabil
-            accounting_style = styles.NamedStyle(
-                name='accounting',
-                number_format='R$ #,##0.00'
-            )
-            
-            # Aplicar formato contábil na coluna Valor_Contabil (coluna E)
-            for row in range(2, sheet.max_row + 1):  # Começa da linha 2 para pular o cabeçalho
-                cell = sheet.cell(row=row, column=5)  # Coluna E (5)
-                cell.style = accounting_style
+            total = client_df_from_excel['Valor Contábil'].sum()
             
             # Adicionar e formatar o total
             total_row = len(client_df_from_excel) + 2
             sheet.cell(row=total_row, column=1, value='Total')
             total_cell = sheet.cell(row=total_row, column=5, value=total)
-            total_cell.style = accounting_style
-            
-            # Ajustar largura das colunas baseado no conteúdo
-            for column in sheet.columns:
-                max_length = 0
-                column_letter = column[0].column_letter
-                
-                for cell in column:
-                    try:
-                        if len(str(cell.value)) > max_length:
-                            max_length = len(str(cell.value))
-                    except:
-                        pass
-                
-                adjusted_width = (max_length + 2)
-                sheet.column_dimensions[column_letter].width = adjusted_width
-            
-            # Adicionar linhas de grade (exceto última linha)
-            max_row = len(client_df_from_excel) + 2  # linha do total
-            for row in sheet.iter_rows(max_row=max_row-1):  # exclui a última linha
-                for cell in row:
-                    cell.border = styles.Border(
-                        left=styles.Side(style='thin'),
-                        right=styles.Side(style='thin'),
-                        top=styles.Side(style='thin'),
-                        bottom=styles.Side(style='thin')
-                    )
-            
-            # Formatar bordas da linha do total
-            for col in range(1, 6):  # colunas A até E
-                cell = sheet.cell(row=max_row, column=col)
-                if col == 1:  # primeira coluna
-                    cell.border = styles.Border(
-                        left=styles.Side(style='thin'),
-                        bottom=styles.Side(style='thin')
-                    )
-                elif col == 5:  # última coluna
-                    cell.border = styles.Border(
-                        right=styles.Side(style='thin'),
-                        bottom=styles.Side(style='thin')
-                    )
-                else:  # colunas do meio
-                    cell.border = styles.Border(
-                        bottom=styles.Side(style='thin')
-                    )
             
             # Salvar as alterações
             workbook.save(file)

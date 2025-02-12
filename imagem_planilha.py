@@ -1,63 +1,65 @@
-import os
+import pandas as pd
+import dataframe_image as dfi
 from pathlib import Path
-from pdf2image import convert_from_path
-import win32com.client
-import time
 
-# Define directories
-input_dir = "extracted_tables"
-output_dir = "imagens"
-temp_dir = "temp_pdf"
 
-# Create output and temp directories if they don't exist
-os.makedirs(output_dir, exist_ok=True)
-os.makedirs(temp_dir, exist_ok=True)
 
-# Initialize Excel
-excel = win32com.client.Dispatch("Excel.Application")
-excel.Visible = False
+input_dir = Path("extracted_tables")  # Diretório com arquivos Excel"
+output_dir = Path("imagens") # Cria o diretório imagens se ele não existir
+output_dir.mkdir(exist_ok=True)
 
-try:
-    # Process each Excel file in the input directory
-    for excel_file in Path(input_dir).glob("*.xlsx"):
-        try:
-            # Full paths
-            pdf_path = os.path.join(temp_dir, f"{excel_file.stem}.pdf")
-            excel_path = str(excel_file.absolute())
-            
-            # Open workbook
-            wb = excel.Workbooks.Open(excel_path)
-            
-            try:
-                # Select and export notas sheet
-                ws = wb.Worksheets("notas")
-                ws.Select()
-                
-                # Convert to PDF - 0 is the constant for PDF format
-                wb.ExportAsFixedFormat(0, pdf_path)
-                
-                # Ensure PDF is ready
-                time.sleep(1)
-                
-                # Convert PDF to image
-                images = convert_from_path(pdf_path)
-                image_path = os.path.join(output_dir, f"{excel_file.stem}.png")
-                images[0].save(image_path, 'PNG')
-                
-                print(f"Successfully converted {excel_file.name} to image")
-                
-            finally:
-                wb.Close(False)  # Close without saving
-                
-        except Exception as e:
-            print(f"Error processing {excel_file.name}: {str(e)}")
-        finally:
-            if os.path.exists(pdf_path):
-                os.remove(pdf_path)
-finally:
-    # Make sure Excel is properly closed
-    excel.Quit()
-    
-# Clean up temp directory
-if os.path.exists(temp_dir) and not os.listdir(temp_dir):
-    os.rmdir(temp_dir)
+for excel_file in input_dir.glob("*.xlsx"):
+    # Import just one example excel file from extracted_tables folder. Import the notas sheet
+    df = pd.read_excel(
+        excel_file,
+        sheet_name="notas",
+        converters={
+            # Garantir que "Nota" seja exibida como string inteira (sem .0)
+            'Nota': lambda x: f"{int(x):d}" if pd.notnull(x) else ''
+        },
+        dtype={'Data': str, 'Cliente': str, 'CPF': str}  # Garantir tipos como string
+    )
+
+    # Preencher TODOS os NaNs com string vazia (evitar "nan" na imagem)
+    df = df.fillna('')
+
+    # Formatar "Valor_Contabil" como R$ X,XX (vírgula decimal)
+    df['Valor Contábil'] = df['Valor Contábil'].apply(lambda x: f"R$ {x:,.2f}".replace(".", "|").replace(",", ".").replace("|", ","))
+
+    # Remover índices do DataFrame
+    styled_df = df.style.hide(axis='index')
+
+    # Aplicar bordas e estilos
+    styled_df = styled_df.set_properties(**{
+        'border': '1px solid black',
+        'text-align': 'center'
+    }).set_table_styles([
+        # Estilo do cabeçalho
+        {'selector': 'th', 'props': [('border', '1px solid black')]},
+        
+        # Remover bordas internas da última linha (exceto bordas externas)
+        {
+            'selector': 'tr:last-child td',
+            'props': [
+                ('border-top', '1px solid black'),
+                ('border-bottom', '1px solid black'),
+                ('border-left', 'none'),
+                ('border-right', 'none')
+            ]
+        },
+        # Borda esquerda na primeira célula da última linha
+        {
+            'selector': 'tr:last-child td:first-child',
+            'props': [('border-left', '1px solid black')]
+        },
+        # Borda direita na última célula da última linha
+        {
+            'selector': 'tr:last-child td:last-child',
+            'props': [('border-right', '1px solid black')]
+        }
+    ])
+
+    nome_arquivo_imagem = f"{output_dir}/{excel_file.stem}.png"
+
+    dfi.export(styled_df, nome_arquivo_imagem, dpi=300)
+    print(f"Imagem salva em: {nome_arquivo_imagem}")
