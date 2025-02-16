@@ -170,11 +170,11 @@ cython_debug/
 # PyPI configuration file
 .pypirc
 
-Matriculas.xlsx
+*.xlsx
+*xls
 Serviços maple bear zona norte.xls
 template.docx
 extracted_tables
-Matriculas.xlsx
 pais_com_mais_de_1_filho.json
 imagens
 output_docx
