@@ -11,7 +11,7 @@ IMAGES_DIR = "imagens"
 EXCEL_DIR = "extracted_tables"
 TEMPLATE_PATH = "template.docx"
 OUTPUT_DIR_DOCX = "output_docx"
-OUTPUT_DIR_PDF = "output_pdf"
+OUTPUT_DIR_PDF = "relatoriosMB_filial"
 JSON_PATH = "pais_com_mais_de_1_filho.json"
 
 # Dicionário de meses em português

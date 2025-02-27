@@ -8,16 +8,16 @@ warnings.filterwarnings('ignore')
 
 
 # Read the Excel file, specifically the "Serviços" sheet
-df = pd.read_excel('Serviços maple bear zona norte.xls', sheet_name='Serviços', header=None)
+df = pd.read_excel('Serviços.xls', sheet_name='Serviços', header=None)
 
 matriculas_df = pd.read_excel(
     'Matriculas.xlsx',
-    sheet_name="Alunos Matriculados (Paulo)",
-    usecols=['Aluno', 'Responsável Financeiro', 'CPF', 'Endereço', 'Bairro']
+    sheet_name="base2024",
+    usecols=['Aluno', 'Responsável Financeiro', 'Endereço', 'Bairro']
 )
 
 # Rename columns
-df.columns = ['Data', 'Nota', 'Cliente', 'Valor Contábil'] if len(df.columns) >= 4 else df.columns
+df.columns = ['Data', 'Nota', 'Cliente', 'CPF', 'Valor Contábil'] if len(df.columns) >= 4 else df.columns
 
 # Remove rows with empty dates or where 'Data' is in the Date column
 df = df[df['Data'].notna()]
@@ -42,9 +42,9 @@ for client in unique_clients:
         nomes_pais = matriculas_df['Responsável Financeiro'].dropna().str.lower().tolist()
         nome_correspondente = get_close_matches(client.lower(), nomes_pais, n=1, cutoff=0.4)[0]
         
-        client_df['CPF'] = matriculas_df[
-            matriculas_df['Responsável Financeiro'].str.lower() == nome_correspondente
-        ]['CPF'].values[0]
+        # client_df['CPF'] = matriculas_df[
+        #     matriculas_df['Responsável Financeiro'].str.lower() == nome_correspondente
+        # ]['CPF'].values[0]
 
         dados_responsavel = matriculas_df[
             matriculas_df['Responsável Financeiro'].str.lower() == nome_correspondente
